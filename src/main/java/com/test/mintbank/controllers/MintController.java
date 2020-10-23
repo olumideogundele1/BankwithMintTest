@@ -1,21 +1,19 @@
 package com.test.mintbank.controllers;
 
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.test.mintbank.dtos.ApiResponse;
 import com.test.mintbank.dtos.CardCountResponse;
+import com.test.mintbank.dtos.MintResponse;
 import com.test.mintbank.models.CardCount;
 import com.test.mintbank.services.MIntService;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONObject;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @RestController
@@ -24,9 +22,13 @@ import java.util.stream.Collectors;
 public class MintController {
 
     private MIntService mIntService;
+    private KafkaTemplate<String, MintResponse> kafkaTemplate;
 
-    public MintController(MIntService mIntService) {
+    private static final String TOPIC = "com.ng.vela.even.card_verified";
+
+    public MintController(MIntService mIntService, KafkaTemplate<String, MintResponse> kafkaTemplate) {
         this.mIntService = mIntService;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
 
@@ -34,8 +36,12 @@ public class MintController {
     public ResponseEntity<?> getCardDetails(@PathVariable Long cardId){
 
         try{
-            return new ResponseEntity<>(new ApiResponse(Boolean.TRUE,mIntService.getCardDetails(cardId)), HttpStatus.OK);
+            MintResponse mintResponse = mIntService.getCardDetails(cardId);
+            kafkaTemplate.send(TOPIC,mintResponse);
+            return new ResponseEntity<>(new ApiResponse(Boolean.TRUE,mintResponse), HttpStatus.OK);
         }catch (Exception e){
+            e.printStackTrace();
+            log.info("Exception " + e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
