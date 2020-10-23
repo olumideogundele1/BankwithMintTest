@@ -9,6 +9,7 @@ import com.test.mintbank.services.CardCountService;
 import com.test.mintbank.services.MIntService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -73,5 +74,10 @@ public class MintServiceImpl implements MIntService {
         }
 
         return cardDetails;
+    }
+
+    @Override
+    public Page<CardCount> getAllCardCount(int pageNo, int pageSize) {
+        return cardCountService.getAllCardBin(pageNo,pageSize);
     }
 }

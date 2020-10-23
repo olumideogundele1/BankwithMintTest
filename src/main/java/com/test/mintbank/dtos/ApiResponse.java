@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-
 public class ApiResponse {
 
     private Boolean success;
