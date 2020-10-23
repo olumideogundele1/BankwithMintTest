@@ -2,9 +2,12 @@ package com.test.mintbank.services.implementation;
 
 
 import com.test.mintbank.dtos.CardDetails;
+import com.test.mintbank.dtos.MintResponse;
+import com.test.mintbank.models.CardCount;
+import com.test.mintbank.repositories.CardCountRepository;
+import com.test.mintbank.services.CardCountService;
 import com.test.mintbank.services.MIntService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -18,14 +21,18 @@ public class MintServiceImpl implements MIntService {
     @Value("binListUrl")
     private String binListUrl;
 
-    @Autowired
+
     private RestTemplate restTemplate;
+    private CardCountService cardCountService;
 
-
+    public MintServiceImpl(RestTemplate restTemplate, CardCountService cardCountService) {
+        this.restTemplate = restTemplate;
+        this.cardCountService = cardCountService;
+    }
 
     @Override
-    public CardDetails getCardDetails(Long cardNumber) {
-        CardDetails cardDetails = new CardDetails();
+    public MintResponse getCardDetails(Long cardNumber) {
+        MintResponse cardDetails = new MintResponse();
         try{
             final String uri = "https://lookup.binlist.net/"+cardNumber;
             HttpHeaders headers = new HttpHeaders();
@@ -37,7 +44,24 @@ public class MintServiceImpl implements MIntService {
             HttpEntity<?> http = new HttpEntity<>(headers);
             ResponseEntity<CardDetails> response = restTemplate.exchange(uri, HttpMethod.GET,http,CardDetails.class);
             if(response.getStatusCode().is2xxSuccessful() && response.getBody() != null){
-                return response.getBody();
+                //create number of Hits
+                CardCount cardCount = cardCountService.getCardByBin(String.valueOf(cardNumber));
+                if(cardCount != null){
+                    //if bin exist increase the count
+                    log.info("Card Count " + cardCount.getCount());
+                    cardCount = cardCountService.updateCount(cardCount.getId());
+                    log.info("Card Count " + cardCount.getCount());
+
+                }else{
+                    //else create bin
+                    CardCount newCardCount = new CardCount();
+                    newCardCount.setBin(String.valueOf(cardNumber));
+                    cardCountService.saveCardBin(newCardCount);
+                }
+
+                return new MintResponse(response.getBody().getScheme(),response.getBody().getType(),
+                        response.getBody().getBank().getName(),response.getBody().getPrepaid(),response.getBody().getBrand());
+
             }else{
                 log.info("Result Not Found");
             }

@@ -26,7 +26,7 @@ public class MintController {
         try{
             return new ResponseEntity<>(new ApiResponse(Boolean.TRUE,mIntService.getCardDetails(cardId)), HttpStatus.OK);
         }catch (Exception e){
-            return new ResponseEntity<>(new ApiResponse(Boolean.FALSE,e.getMessage()), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 }

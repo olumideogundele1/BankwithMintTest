@@ -1,7 +1,5 @@
 package com.test.mintbank.dtos;
 
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,11 +7,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CardDetails {
+public class MintResponse {
 
     private String scheme;
     private String type;
-    private Bank bank;
+    private String bank;
     private Boolean prepaid;
     private String brand;
 

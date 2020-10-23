@@ -6,21 +6,22 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
+
 public class ApiResponse {
 
     private Boolean success;
-    private CardDetails payload;
-    private String message;
+    private Object payload;
 
 
-    public ApiResponse(Boolean success, CardDetails payload){
+    public ApiResponse(){}
+
+
+    public ApiResponse(Boolean success, Object payload){
         this.success = success;
         this.payload = payload;
     }
 
-    public ApiResponse(Boolean success, String message){
-        this.message = message;
+    public ApiResponse(Boolean success){
         this.success = success;
     }
 
