@@ -17,5 +17,5 @@ public class CardCountResponse {
     private int size;
     private int start;
     private int limit;
-    private List<Map<String,Integer>> payload;
+    private Map<String,Integer> payload;
 }
